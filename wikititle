@@ -1,0 +1,83 @@
+#!/usr/bin/php
+<?php
+
+list(, $series, $season, $episode) = $argv;
+
+info(sprintf('Searching for %s s%02de%02d', $series, $season, $episode));
+$data = getContent('List of ' . $series . ' episodes');
+
+if ($data === null)
+{
+	$data = getContent($series);
+	if (empty($data))
+	{
+		info('Can\'t find data for series ' . $series);
+		exit(1);
+	}
+}
+
+$start = preg_match("/=\s*(Season|Series)\s*{$season}/i", $data, $matches, PREG_OFFSET_CAPTURE, 0);
+
+if (!$start)
+{
+	info('Can\'t find season...');
+	exit(1);
+}
+
+$start = $matches[0][1];
+
+if (preg_match("/{{:([^}]+)}}/", $data, $matches, 0, $start))
+{
+	info('Following to ' . $matches[1]);
+	$data = getContent($matches[1]);
+	if ($data === null)
+	{
+		info('Got an empty reposne trying to follow redirect to ' . $matches[1]);
+		exit(2);
+	}
+	$start = 0;
+}
+
+$start = preg_match("/EpisodeNumber2\s*=\s*0?{$episode}/", $data, $matches, PREG_OFFSET_CAPTURE, $start);
+
+if (!$start)
+{
+	info('Can not find episode number');
+	exit(1);
+}
+
+$start = $matches[0][1];
+
+$start = preg_match('/\|\s*(Episode)?Title\s*=\s*(\[\[([^\|\]*\|?)([^\[]+)|[^[\n]+)/', $data, $matches, 0, $start);
+
+if (!$start)
+{
+	info('Could not extract title');
+	exit(1);
+}
+
+echo end($matches);
+
+function info($text)
+{
+	fputs(STDERR, $text);
+	fputs(STDERR, PHP_EOL);
+}
+
+function getContent($page)
+{
+	$page = urlencode($page);
+	$data = file_get_contents('http://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvlimit=1&rvprop=content&format=json&titles=' . $page);
+	$data = json_decode($data, true);
+	$data = $data['query']['pages'];
+
+	if (array_key_exists(-1, $data))
+	{
+		return null;
+	}
+
+	$data = current($data);
+	$data = $data['revisions'][0]['*'];
+	return $data;
+}
+
