@@ -1,6 +1,11 @@
 #!/usr/bin/php
 <?php
 
+if (!empty($_SERVER['WTCACHE']))
+{
+	`mkdir -p "{$_SERVER['WTCACHE']}"`;
+}
+
 list(, $series, $season, $episode) = $argv;
 
 info(sprintf('Searching for %s s%02de%02d', $series, $season, $episode));
@@ -48,7 +53,7 @@ if (!$start)
 
 $start = $matches[0][1];
 
-$start = preg_match('/\|\s*(Episode)?Title\s*=\s*(\[\[([^\|\]*\|?)([^\[]+)|[^[\n]+)/', $data, $matches, 0, $start);
+$start = preg_match('/\|\s*(Episode)?Title\s*=\s*(\[\[)?([^\|\n]+\|)?([^\[\]\n]+)/', $data, $matches, 0, $start);
 
 if (!$start)
 {
@@ -67,6 +72,13 @@ function info($text)
 function getContent($page)
 {
 	$page = urlencode($page);
+	if (!empty($_SERVER['WTCACHE']))
+	{
+		if (file_exists($_SERVER['WTCACHE'] . '/' . $page))
+		{
+			return file_get_contents($_SERVER['WTCACHE'] . '/' . $page);
+		}
+	}
 	$data = file_get_contents('http://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvlimit=1&rvprop=content&format=json&titles=' . $page);
 	$data = json_decode($data, true);
 	$data = $data['query']['pages'];
@@ -78,6 +90,12 @@ function getContent($page)
 
 	$data = current($data);
 	$data = $data['revisions'][0]['*'];
+
+	if (!empty($_SERVER['WTCACHE']))
+	{
+		file_put_contents($_SERVER['WTCACHE'] . '/' . $page, $data);
+	}
+
 	return $data;
 }
 
