@@ -111,6 +111,12 @@ function getContent($page)
 	$data = current($data);
 	$data = $data['revisions'][0]['*'];
 
+	if (strtoupper(substr($data, 0, 9)) === '#REDIRECT')
+	{
+		$new = substr($data, 12, -2);
+		$data = getContent($new);
+	}
+
 	if (!empty($_SERVER['WTCACHE']))
 	{
 		file_put_contents($_SERVER['WTCACHE'] . '/' . $page, $data);
