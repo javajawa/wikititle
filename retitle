@@ -1,17 +1,50 @@
 #!/usr/bin/php
 <?php
 
-define('ACT', !in_array('-n', $argv));
+unset($argv[0]);
 
-$dir = realpath(getcwd());
-$dir = explode('/', $dir);
+$series = null;
 
-assert(next($dir) === 'srv');
-assert(next($dir) === 'media');
-assert(next($dir) === 'video');
-assert(next($dir) === 'Series');
-assert(next($dir) !== false);
-$series = current($dir);
+foreach ($argv as $arg)
+{
+	if (substr($arg, 0, 1) === '-')
+	{
+		$args = str_split(substr($arg, 1));
+		foreach ($args as $opt)
+		{
+			switch ($opt)
+			{
+				case 'n':
+					if (!defined('ACT'))
+					{
+						define('ACT', false);
+					}
+					break;
+				default:
+					echo 'Unrecognised option "', $opt, '"', PHP_EOL;
+			}
+		}
+	}
+	else $series = $arg;
+}
+
+if (!defined('ACT'))
+{
+	define('ACT', true);
+}
+
+if ($series === null)
+{
+	$dir = realpath(getcwd());
+	$dir = explode('/', $dir);
+
+	assert(next($dir) === 'srv');
+	assert(next($dir) === 'media');
+	assert(next($dir) === 'video');
+	assert(next($dir) === 'Series');
+	assert(next($dir) !== false);
+	$series = current($dir);
+}
 
 $files = glob('{*,*/*}.{m4v,avi,mkv,mp4,ogm}', GLOB_BRACE);
 $failed = 0;
