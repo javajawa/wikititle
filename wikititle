@@ -73,7 +73,7 @@ if (!$start)
 
 $start = $matches[0][1];
 
-$start = preg_match('/\|\s*(Episode)?Title\s*=\s*(\[\[)?([^\|\n]+\|)?([^\[\]\n]+)/', $data, $matches, 0, $start);
+$start = preg_match('/\|\s*(Episode|English)?Title\s*=\s*(\[\[)?([^\|\n]+\|)?([^\[\]\n]+)/', $data, $matches, 0, $start);
 
 if (!$start)
 {
