@@ -8,6 +8,9 @@ if (!empty($_SERVER['WTCACHE']))
 
 list(, $series, $season, $episode) = $argv;
 
+$season = (int)$season;
+$episode = (int)$episode;
+
 info(sprintf('Searching for %s s%02de%02d', $series, $season, $episode));
 $data = getContent('List of ' . $series . ' episodes');
 
