@@ -24,35 +24,42 @@ if ($data === null)
 	}
 }
 
-switch ($season)
+if ($season > 0)
 {
-	case 1: $osea = 'one'; break;
-	case 2: $osea = 'two'; break;
-	case 3: $osea = 'three'; break;
-	case 4: $osea = 'four'; break;
-	case 5: $osea = 'five'; break;
-	default: $osea = 'fdsfdsfsdfsf'; break;
-}
-
-$start = preg_match("/=\s*(Season|Series)\s*({$season}|{$osea})/i", $data, $matches, PREG_OFFSET_CAPTURE, 0);
-
-if (!$start)
-{
-	info('Can\'t find season...');
-	exit(1);
-}
-
-$start = $matches[0][1];
-
-if (preg_match("/{{:([^}]+)}}/", $data, $matches, 0, $start))
-{
-	info('Following to ' . $matches[1]);
-	$data = getContent($matches[1]);
-	if ($data === null)
+	switch ($season)
 	{
-		info('Got an empty reposne trying to follow redirect to ' . $matches[1]);
-		exit(2);
+		case 1: $osea = 'one'; break;
+		case 2: $osea = 'two'; break;
+		case 3: $osea = 'three'; break;
+		case 4: $osea = 'four'; break;
+		case 5: $osea = 'five'; break;
+		default: $osea = 'fdsfdsfsdfsf'; break;
 	}
+
+	$start = preg_match("/=\s*(Season|Series)\s*({$season}|{$osea})/i", $data, $matches, PREG_OFFSET_CAPTURE, 0);
+
+	if (!$start)
+	{
+		info('Can\'t find season...');
+		exit(1);
+	}
+
+	$start = $matches[0][1];
+
+	if (preg_match("/{{:([^}]+)}}/", $data, $matches, 0, $start))
+	{
+		info('Following to ' . $matches[1]);
+		$data = getContent($matches[1]);
+		if ($data === null)
+		{
+			info('Got an empty reposne trying to follow redirect to ' . $matches[1]);
+			exit(2);
+		}
+		$start = 0;
+	}
+}
+else
+{
 	$start = 0;
 }
 
