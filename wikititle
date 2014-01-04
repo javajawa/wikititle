@@ -24,7 +24,17 @@ if ($data === null)
 	}
 }
 
-$start = preg_match("/=\s*(Season|Series)\s*{$season}/i", $data, $matches, PREG_OFFSET_CAPTURE, 0);
+switch ($season)
+{
+	case 1: $osea = 'one'; break;
+	case 2: $osea = 'two'; break;
+	case 3: $osea = 'three'; break;
+	case 4: $osea = 'four'; break;
+	case 5: $osea = 'five'; break;
+	default: $osea = 'fdsfdsfsdfsf'; break;
+}
+
+$start = preg_match("/=\s*(Season|Series)\s*({$season}|{$osea})/i", $data, $matches, PREG_OFFSET_CAPTURE, 0);
 
 if (!$start)
 {
