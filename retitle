@@ -1,0 +1,79 @@
+#!/usr/bin/php
+<?php
+
+define('ACT', !in_array('-n', $argv));
+
+$dir = realpath(getcwd());
+$dir = explode('/', $dir);
+
+assert(next($dir) === 'srv');
+assert(next($dir) === 'media');
+assert(next($dir) === 'video');
+assert(next($dir) === 'Series');
+assert(next($dir) !== false);
+$series = current($dir);
+
+$files = glob('{*,*/*}.{m4v,avi,mkv,mp4,ogm}', GLOB_BRACE);
+$failed = 0;
+
+if (count($files) === 0)
+{
+	echo 'Did not find any files', PHP_EOL;
+}
+
+printf("Checking %d files\n", count($files));
+putenv('WTCACHE=/tmp/wikititle');
+
+foreach ($files as $file)
+{
+	if (preg_match('/([0-9]*)[\.\s]*[ex]([0-9]+)/i', $file, $matches))
+	{
+		$season = is_numeric($matches[1]) ? $matches[1] : 0;
+		$episode = $matches[2];
+	}
+	elseif (preg_match('/\(([0-9]+)\)/', $file, $matches))
+	{
+		$season = 0;
+		$episode = $matches[1];
+	}
+	elseif (preg_match('/- ([0-9]+)/', $file, $matches))
+	{
+		$season = 0;
+		$episode = $matches[1];
+	}
+	else
+	{
+		printf("Can't get series info from %s\n", $file);
+		continue;
+	}
+
+	$title = null;
+	exec("wikititle \"{$series}\" {$season} {$episode}", $title, $ret);
+
+	if ($ret !== 0)
+	{
+		++$failed;
+		continue;
+	}
+
+	$title = current($title);
+	$title = str_replace(array('/'), '-', $title);
+	$title = sprintf('s%02de%02d - %s', $season, $episode, $title);
+	$title = rtrim(trim($title), '.');
+
+	if ($title !== pathinfo($file, PATHINFO_FILENAME))
+	{
+		$title = pathinfo($file, PATHINFO_DIRNAME) . '/' . $title . '.' . pathinfo($file, PATHINFO_EXTENSION);
+
+		if (ACT)
+		{
+			rename($file, $title);
+		}
+		else
+		{
+			printf('mv "%s" "%s" %s', $file, $title, PHP_EOL);
+		}
+	}
+}
+
+echo $failed, ' lookups failed', PHP_EOL;
