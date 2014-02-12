@@ -36,7 +36,7 @@ if ($season > 0)
 		default: $osea = 'fdsfdsfsdfsf'; break;
 	}
 
-	$start = preg_match("/=\s*(Season|Series)\s*({$season}|{$osea})/i", $data, $matches, PREG_OFFSET_CAPTURE, 0);
+	$start = preg_match("/^\s*=+\s*(Season|Series)\s*({$season}|{$osea})/mi", $data, $matches, PREG_OFFSET_CAPTURE, 0);
 
 	if (!$start)
 	{
@@ -73,7 +73,7 @@ if (!$start)
 
 $start = $matches[0][1];
 
-$start = preg_match('/\|\s*(Episode|English)?Title\s*=\s*(\[\[)?([^\|\n]+\|)?([^\[\]\n]+)/', $data, $matches, 0, $start);
+$start = preg_match('/\|\s*(Episode|English)?TitleA?\s*=\s*(\[\[)?([^\|\n]+\|)?([^\[\]\n]+)/', $data, $matches, 0, $start);
 
 if (!$start)
 {
