@@ -90,7 +90,7 @@ foreach ($files as $file)
 	}
 
 	$title = current($title);
-	$title = str_replace(array('/'), '-', $title);
+	$title = str_replace(array('/', ':', '?'), array('-', ' -', ''), $title);
 	$title = sprintf('s%02de%02d - %s', $season, $episode, $title);
 	$title = rtrim(trim($title), '.');
 
